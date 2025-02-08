@@ -1,0 +1,65 @@
+#set target = ML7AS
+
+const DEBUG = false
+
+if DEBUG === true
+	start = @time
+end
+if DEBUG === true
+	// debug memory cell, change N to one that linked by processor
+	D_MC = cell1
+	D_MSG = message2
+	allocate heap in D_MC[60...63]
+end
+
+if !switch1.enabled
+	end()
+end
+
+// ***************** Logic Start ********************** //
+
+FACTORY = factory1
+PROD_NUM = 12
+
+COUNTER = 0
+FIRST_UNIT = null
+
+printf("Control factory's work state by\n")
+printf("  counting total same units...\n")
+
+do 
+	ubind(FACTORY.config)
+	if @unit === null
+		break
+	end
+	if COUNTER === 0
+		FIRST_UNIT = @unit
+		COUNTER += 1
+	elsif FIRST_UNIT !== @unit
+		COUNTER += 1
+	else 
+		FIRST_UNIT = null
+		printf("counter: ${}\n", COUNTER)
+		printflush(message1)
+		break
+	end
+loop while FACTORY.config !== null && @unit.health > 0 && FIRST_UNIT !== null && FIRST_UNIT.health > 0
+	&& switch1.enabled
+
+FACTORY.enabled = COUNTER >= PROD_NUM ? false : true
+
+// *****************  Logic End  ********************** //
+
+if DEBUG == true
+	end_ = @time
+	$runCount += 1
+	$totalTime += ceil(end_ - start)
+	if $totalTime > 0xFFF
+		avgTime = ceil($totalTime / $runCount)
+		$runCount = 0
+		$totalTime = 0
+	end
+	printf("\n[gray]LOG: Cost time: ${}ms\n", ceil(end_ - start))
+	printf("\n[gray]LOG: Avg Cost time: ${}ms\n", avgTime)
+	printflush(D_MSG)
+end
